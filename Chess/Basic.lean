@@ -1,5 +1,6 @@
 import Lean
 import Lean.Data.Json.FromToJson
+import Mathlib
 
 declare_syntax_cat chess_square
 declare_syntax_cat horizontal_border
@@ -863,7 +864,17 @@ def valid_moves (pos : Position) : List (ChessMove × Position) := Id.run do
 
   return ambiguate moves
 
-#reduce valid_moves game_start
+set_option maxRecDepth 2048
+def after_first_move := (valid_moves game_start)
+#reduce after_first_move.length
+def after_second_move := (after_first_move.map (fun pair => (valid_moves pair.2))).flatten
+#reduce after_second_move.length
+def after_third_move := (after_second_move.map (fun pair => (((valid_moves pair.2).map (fun pos => pos.2.squares))))).flatten.toFinset
+#eval after_third_move.card
+def after_third_move_en_passent := (after_second_move.map (fun pair => (valid_moves pair.2))).flatten.toFinset
+#eval after_third_move_en_passent.card
+
+
 --#reduce valid_moves pos2
 
 -- returns true if p.turn is in check and has no moves
