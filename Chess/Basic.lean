@@ -864,15 +864,26 @@ def valid_moves (pos : Position) : List (ChessMove × Position) := Id.run do
 
   return ambiguate moves
 
+partial def A048987 (pos : Position) (depth : Nat) : Nat :=
+  match depth with
+  | 0 => 1
+  | n + 1 =>
+    let moves := valid_moves pos
+    moves.foldl (fun acc (_, newPos) => acc + A048987 newPos n) 0
+
+#eval A048987 game_start 1
+#eval A048987 game_start 2
+#eval A048987 game_start 3
+#eval A048987 game_start 4
+
+
 set_option maxRecDepth 2048
 def after_first_move := (valid_moves game_start)
-#reduce after_first_move.length
+#eval after_first_move.length
 def after_second_move := (after_first_move.map (fun pair => (valid_moves pair.2))).flatten
-#reduce after_second_move.length
+#eval after_second_move.length
 def after_third_move := (after_second_move.map (fun pair => (((valid_moves pair.2).map (fun pos => pos.2.squares))))).flatten.toFinset
 #eval after_third_move.card
-def after_third_move_en_passent := (after_second_move.map (fun pair => (valid_moves pair.2))).flatten.toFinset
-#eval after_third_move_en_passent.card
 
 
 --#reduce valid_moves pos2
